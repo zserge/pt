@@ -27,7 +27,7 @@ struct pt {
 	int status;
 };
 #define pt_init()                                                              \
-  { .label = 0 }
+  { .label = 0, .status = 0 }
 #define pt_begin(pt)                                                           \
   switch ((pt)->label) {                                                       \
   case 0:
