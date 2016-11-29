@@ -39,7 +39,25 @@ static void test_local_continuation() {
 	assert(pt_status(&pt) == -1 && reent == 4 && state == 2);
 }
 
+/*
+ * Test empty protothread
+ */
+static void pt_empty(struct pt *pt, int *reent) {
+	pt_begin(pt);
+	(*reent)++;
+	pt_end(pt);
+}
+static void test_empty() {
+	int reent = 0;
+	struct pt pt = pt_init();
+	pt_empty(&pt, &reent);
+	assert(reent == 1);
+	pt_empty(&pt, &reent);
+	assert(reent == 1);
+}
+
 int main() {
 	test_local_continuation();
+	test_empty();
 	return 0;
 }
