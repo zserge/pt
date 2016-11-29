@@ -122,4 +122,24 @@ struct pt {
     return;                                                                    \
   } while (0)
 
+#define pt_loop(pt, cond)                                                      \
+  for (int _intr = 0; _intr == 0;)                                             \
+    if (1) {                                                                   \
+      pt_label(pt, PT_STATUS_BLOCKED);                                         \
+      if (!cond) {                                                             \
+        break;                                                                 \
+      }                                                                        \
+      goto _pt_line(body);                                                     \
+    } else                                                                     \
+      while (1)                                                                \
+        if (1) {                                                               \
+          _intr = 1;                                                           \
+          break;                                                               \
+        } else                                                                 \
+          while (1)                                                            \
+            if (1) {                                                           \
+              return;                                                          \
+            } else                                                             \
+  _pt_line(body) :
+
 #endif /* PT_H */

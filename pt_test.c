@@ -129,11 +129,79 @@ static void test_exit() {
 	assert(state == 1 && pt_status(&pt) == PT_STATUS_FINISHED);
 }
 
+/*
+ * Test complex protothread wait loops
+ */
+static void pt_loop_with_braces(struct pt *pt, int *state, int timeout, int
+		ready) {
+  pt_begin(pt);
+	*state = 1;
+  pt_loop(pt, !timeout) {
+    if (ready) {
+      break;
+    }
+		(*state)++;
+  }
+	*state = -1;
+  pt_end(pt);
+}
+static void pt_loop_without_braces(struct pt *pt, int *state, int timeout,
+		int ready) {
+  pt_begin(pt);
+	*state = 1;
+// clang-format off
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdangling-else"
+#endif
+	if (1)
+		pt_loop(pt, !timeout)
+			if (ready)
+				break;
+			else
+				(*state)++;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  // clang-format on
+	*state = -1;
+  pt_end(pt);
+}
+#include <stdio.h>
+static void test_loop() {
+	int state = 0;
+	struct pt pt1 = pt_init();
+	struct pt pt2 = pt_init();
+	struct pt pt3 = pt_init();
+
+	pt_loop_with_braces(&pt1, &state, 0, 0);
+	assert(state == 2);
+	pt_loop_with_braces(&pt1, &state, 0, 0);
+	assert(state == 3);
+	pt_loop_with_braces(&pt1, &state, 1, 0);
+	assert(state == -1);
+
+	pt_loop_without_braces(&pt2, &state, 0, 0);
+	assert(state == 2);
+	pt_loop_without_braces(&pt2, &state, 0, 0);
+	assert(state == 3);
+	pt_loop_without_braces(&pt2, &state, 1, 0);
+	assert(state == -1);
+
+	pt_loop_without_braces(&pt3, &state, 0, 0);
+	assert(state == 2);
+	pt_loop_without_braces(&pt3, &state, 0, 0);
+	assert(state == 3);
+	pt_loop_without_braces(&pt3, &state, 0, 1);
+	assert(state == -1);
+}
+
 int main() {
 	test_local_continuation();
 	test_empty();
 	test_wait();
 	test_yield();
 	test_exit();
+	test_loop();
 	return 0;
 }
