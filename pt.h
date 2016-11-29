@@ -93,4 +93,12 @@ struct pt {
  */
 #define pt_status(pt) (pt)->status
 
+#define pt_wait(pt, cond)                                                      \
+  do {                                                                         \
+    pt_label(pt, 0);                                                           \
+    if (!(cond)) {                                                             \
+      return;                                                                  \
+    }                                                                          \
+  } while (0)
+
 #endif /* PT_H */

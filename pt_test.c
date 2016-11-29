@@ -50,6 +50,7 @@ static void pt_empty(struct pt *pt, int *reent) {
 static void test_empty() {
 	int reent = 0;
 	struct pt pt = pt_init();
+
 	pt_empty(&pt, &reent);
 	assert(reent == 1);
 	/* shoud not re-enter */
@@ -57,8 +58,35 @@ static void test_empty() {
 	assert(reent == 1);
 }
 
+/*
+ * Test waiting for certain conditions
+ */
+static void pt_wait_ready(struct pt *pt, int *reent, int ready) {
+	pt_begin(pt);
+	(*reent)++;
+	pt_wait(pt, ready);
+	(*reent)++;
+	pt_end(pt);
+}
+static void test_wait() {
+	int ready = 0;
+	int reent = 0;
+	struct pt pt = pt_init();
+
+	pt_wait_ready(&pt, &reent, ready);
+	assert(reent == 1);
+	pt_wait_ready(&pt, &reent, ready);
+	assert(reent == 1);
+
+	ready = 1;
+
+	pt_wait_ready(&pt, &reent, ready);
+	assert(reent == 2);
+}
+
 int main() {
 	test_local_continuation();
 	test_empty();
+	test_wait();
 	return 0;
 }
