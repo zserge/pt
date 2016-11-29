@@ -167,7 +167,6 @@ static void pt_loop_without_braces(struct pt *pt, int *state, int timeout,
   *state = -1;
   pt_end(pt);
 }
-#include <stdio.h>
 static void test_loop() {
   int state = 0;
   struct pt pt1 = pt_init();
