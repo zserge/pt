@@ -1,6 +1,8 @@
 pt
 ==
 
+[![Build Status](https://travis-ci.org/zserge/pt.svg?branch=master)](https://travis-ci.org/zserge/pt)
+
 Pt is the most lightweight [protothreads][1] or [coroutines][2] implementation I
 could only think of.
 
