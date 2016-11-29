@@ -1,6 +1,10 @@
 #ifndef PT_H
 #define PT_H
 
+#define PT_STATUS_BLOCKED 0
+#define PT_STATUS_FINISHED -1
+#define PT_STATUS_YIELDED -2
+
 /* Helper macros to generate unique labels */
 #define _pt_line3(name, line) _pt_##name##line
 #define _pt_line2(name, line) _pt_line3(name, line)
@@ -33,7 +37,7 @@ struct pt {
     (pt)->status = (stat);                                                     \
     setjmp((pt)->env);                                                         \
   } while (0)
-#define pt_end(pt) pt_label(pt, -1)
+#define pt_end(pt) pt_label(pt, PT_STATUS_FINISHED)
 #elif PT_USE_GOTO
 #include <unistd.h>
 /*
@@ -57,20 +61,21 @@ struct pt {
 
 #define pt_label(pt, stat)                                                     \
   do {                                                                         \
-    _pt_line(label) : (pt)->label = &&_pt_line(label);                         \
     (pt)->status = (stat);                                                     \
+    _pt_line(label) : (pt)->label = &&_pt_line(label);                         \
   } while (0)
-#define pt_end(pt) pt_label(pt, -1)
+#define pt_end(pt) pt_label(pt, PT_STATUS_FINISHED)
 #else
 /*
  * Local continuation based on switch/case and line numbers.
  *
  * Pros: works with any C99 compiler, most simple implementation.
- * Cons: doesn't allow more than one label per line, doesn't preserve local variables.
+ * Cons: doesn't allow more than one label per line, doesn't preserve local
+ * variables.
  */
 struct pt {
-	int label;
-	int status;
+  int label;
+  int status;
 };
 #define pt_init()                                                              \
   { .label = 0, .status = 0 }
@@ -84,7 +89,7 @@ struct pt {
   case __LINE__:;                                                              \
   } while (0)
 #define pt_end(pt)                                                             \
-  pt_label(pt, -1);                                                            \
+  pt_label(pt, PT_STATUS_FINISHED);                                            \
   }
 #endif
 
@@ -95,8 +100,17 @@ struct pt {
 
 #define pt_wait(pt, cond)                                                      \
   do {                                                                         \
-    pt_label(pt, 0);                                                           \
+    pt_label(pt, PT_STATUS_BLOCKED);                                           \
     if (!(cond)) {                                                             \
+      return;                                                                  \
+    }                                                                          \
+  } while (0)
+
+#define pt_yield(pt)                                                           \
+  do {                                                                         \
+    pt_label(pt, PT_STATUS_YIELDED);                                           \
+    if (pt_status(pt) == PT_STATUS_YIELDED) {                                  \
+      (pt)->status = PT_STATUS_BLOCKED;                                        \
       return;                                                                  \
     }                                                                          \
   } while (0)

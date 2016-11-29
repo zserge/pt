@@ -84,9 +84,35 @@ static void test_wait() {
 	assert(reent == 2);
 }
 
+/*
+ * Test protothread explicit yielding
+ */
+static void pt_yielding(struct pt *pt, int *state) {
+  pt_begin(pt);
+	(*state) = 1;
+  pt_yield(pt);
+	(*state) = 2;
+  pt_end(pt);
+}
+static void test_yield() {
+	int state = 0;
+  struct pt pt1 = pt_init();
+  struct pt pt2 = pt_init();
+
+  pt_yielding(&pt1, &state);
+  assert(pt_status(&pt1) == PT_STATUS_BLOCKED && state == 1);
+  pt_yielding(&pt2, &state);
+  assert(pt_status(&pt2) == PT_STATUS_BLOCKED && state == 1);
+  pt_yielding(&pt1, &state);
+  assert(pt_status(&pt1) == PT_STATUS_FINISHED && state == 2);
+  pt_yielding(&pt2, &state);
+  assert(pt_status(&pt2) == PT_STATUS_FINISHED && state == 2);
+}
+
 int main() {
 	test_local_continuation();
 	test_empty();
 	test_wait();
+	test_yield();
 	return 0;
 }
