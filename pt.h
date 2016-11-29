@@ -88,4 +88,9 @@ struct pt {
   }
 #endif
 
+/*
+ * Core protothreads API
+ */
+#define pt_status(pt) (pt)->status
+
 #endif /* PT_H */

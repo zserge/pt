@@ -27,16 +27,16 @@ static void test_local_continuation() {
 	struct pt pt = pt_init();
 
 	pt_reentrant(&pt, &reent, &state);
-	assert(pt.status == 1 && reent == 1 && state == 1);
+	assert(pt_status(&pt) == 1 && reent == 1 && state == 1);
 
 	pt_reentrant(&pt, &reent, &state);
-	assert(pt.status == 2 && reent == 2 && state == 2);
+	assert(pt_status(&pt) == 2 && reent == 2 && state == 2);
 
 	pt_reentrant(&pt, &reent, &state);
-	assert(pt.status == -1 && reent == 3 && state == 2);
+	assert(pt_status(&pt) == -1 && reent == 3 && state == 2);
 
 	pt_reentrant(&pt, &reent, &state);
-	assert(pt.status == -1 && reent == 4 && state == 2);
+	assert(pt_status(&pt) == -1 && reent == 4 && state == 2);
 }
 
 int main() {
