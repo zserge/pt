@@ -195,6 +195,80 @@ static void test_loop() {
   assert(state == -1);
 }
 
+struct pair {
+  int x;
+  int y;
+};
+typedef pt_queue(int, 3) int_queue_t;
+typedef pt_queue(struct pair, 3) pair_queue_t;
+static void pt_add(struct pt *pt, pair_queue_t *pairs, int_queue_t *ints) {
+  pt_begin(pt);
+  for (;;) {
+    pt_wait(pt, !pt_queue_empty(pairs));
+    struct pair *p = pt_queue_pop(pairs);
+    pt_wait(pt, !pt_queue_full(ints));
+    pt_queue_push(ints, p->x + p->y);
+  }
+  pt_end(pt);
+}
+static void test_queues() {
+  struct pt pt = pt_init();
+  int_queue_t ints = pt_queue_init();
+  pair_queue_t pairs = pt_queue_init();
+
+  assert(pt_queue_len(&ints) == 3);
+  assert(pt_queue_cap(&ints) == 0);
+  assert(pt_queue_empty(&ints));
+  assert(!pt_queue_full(&ints));
+
+  assert(pt_queue_len(&pairs) == 3);
+  assert(pt_queue_cap(&pairs) == 0);
+  assert(pt_queue_empty(&pairs));
+  assert(!pt_queue_full(&pairs));
+
+  assert(pt_queue_push(&ints, 1));
+  assert(!pt_queue_empty(&ints));
+  assert(!pt_queue_full(&ints));
+
+  assert(pt_queue_push(&ints, 3));
+
+  assert(pt_queue_len(&ints) == 3 && pt_queue_cap(&ints) == 2);
+
+  assert(pt_queue_push(&ints, 5));
+  assert(!pt_queue_push(&ints, 7));
+
+  assert(pt_queue_full(&ints));
+
+  assert(*(pt_queue_pop(&ints)) == 1);
+  assert(!pt_queue_full(&ints));
+
+  assert(*(pt_queue_pop(&ints)) == 3);
+  assert(*(pt_queue_pop(&ints)) == 5);
+  assert(pt_queue_pop(&ints) == NULL);
+
+  assert(!pt_queue_full(&ints));
+  assert(pt_queue_empty(&ints));
+
+  pt_queue_push(&pairs, ((struct pair){1, 2}));
+  pt_queue_push(&pairs, ((struct pair){7, 5}));
+
+  pt_add(&pt, &pairs, &ints);
+
+  assert(*(pt_queue_peek(&ints)) == 3);
+  assert(*(pt_queue_peek(&ints)) == 3);
+  assert(*(pt_queue_pop(&ints)) == 3);
+  assert(*(pt_queue_pop(&ints)) == 12);
+  assert(pt_queue_pop(&ints) == NULL);
+  assert(pt_queue_peek(&ints) == NULL);
+
+  pt_add(&pt, &pairs, &ints);
+  assert(pt_queue_pop(&ints) == NULL);
+
+  pt_queue_push(&pairs, ((struct pair){123, 456}));
+  pt_add(&pt, &pairs, &ints);
+  assert(*(pt_queue_pop(&ints)) == 123 + 456);
+}
+
 int main() {
   test_local_continuation();
   test_empty();
@@ -202,5 +276,6 @@ int main() {
   test_yield();
   test_exit();
   test_loop();
+  test_queues();
   return 0;
 }
