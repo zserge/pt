@@ -166,4 +166,13 @@ struct pt {
 #define pt_queue_pop(q)                                                        \
   (pt_queue_empty(q) ? NULL : &(q)->buf[(q)->r++ % pt_queue_len(q)])
 
+/*
+ * Wrapper for system calls and other functions that return -1 and set errno
+ */
+#define pt_sys(pt, call)                                                       \
+  pt_wait(pt,                                                                  \
+          (errno = 0) ||                                                       \
+              !(((call) == -1) && (errno == EAGAIN || errno == EWOULDBLOCK ||  \
+                                   errno == EINPROGRESS || errno == EINTR)))
+
 #endif /* PT_H */
