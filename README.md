@@ -115,6 +115,6 @@ Pt is well covered with tests.
 Code is distributed under MIT license, feel free to use it in your proprietary
 projects as well.
 
-[1]: dunkels.com/adam/pt/
+[1]: http://dunkels.com/adam/pt/
 [2]: https://en.wikipedia.org/wiki/Coroutine
 [3]: https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
