@@ -109,10 +109,31 @@ static void test_yield() {
   assert(pt_status(&pt2) == PT_STATUS_FINISHED && state == 2);
 }
 
+/*
+ * Test protothread early termination
+ */
+static void pt_exiting(struct pt *pt, int *state) {
+	pt_begin(pt);
+	(*state) = 1;
+	pt_exit(pt, PT_STATUS_FINISHED);
+	(*state) = 2;
+	pt_end(pt);
+}
+static void test_exit() {
+	int state = 0;
+	struct pt pt = pt_init();
+
+	pt_exiting(&pt, &state);
+	assert(state == 1 && pt_status(&pt) == PT_STATUS_FINISHED);
+	pt_exiting(&pt, &state);
+	assert(state == 1 && pt_status(&pt) == PT_STATUS_FINISHED);
+}
+
 int main() {
 	test_local_continuation();
 	test_empty();
 	test_wait();
 	test_yield();
+	test_exit();
 	return 0;
 }

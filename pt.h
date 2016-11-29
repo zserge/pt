@@ -115,4 +115,10 @@ struct pt {
     }                                                                          \
   } while (0)
 
+#define pt_exit(pt, stat)                                                      \
+  do {                                                                         \
+    pt_label(pt, stat);                                                        \
+    return;                                                                    \
+  } while (0)
+
 #endif /* PT_H */
