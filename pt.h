@@ -13,6 +13,27 @@
  * Pros: local variables are preserved, works with all control structures.
  * Cons: slow, may erase global register variables.
  */
+#include <setjmp.h>
+struct pt {
+  jmp_buf env;
+  int isset;
+  int status;
+};
+#define pt_init()                                                              \
+  { .isset = 0, .status = 0 }
+#define pt_begin(pt)                                                           \
+  do {                                                                         \
+    if ((pt)->isset) {                                                         \
+      longjmp((pt)->env, 0);                                                   \
+    }                                                                          \
+  } while (0)
+#define pt_label(pt, stat)                                                     \
+  do {                                                                         \
+    (pt)->isset = 1;                                                           \
+    (pt)->status = (stat);                                                     \
+    setjmp((pt)->env);                                                         \
+  } while (0)
+#define pt_end(pt) pt_label(pt, -1)
 #elif PT_USE_GOTO
 #include <unistd.h>
 /*
