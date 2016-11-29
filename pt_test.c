@@ -52,6 +52,7 @@ static void test_empty() {
 	struct pt pt = pt_init();
 	pt_empty(&pt, &reent);
 	assert(reent == 1);
+	/* shoud not re-enter */
 	pt_empty(&pt, &reent);
 	assert(reent == 1);
 }
