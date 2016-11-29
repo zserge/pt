@@ -1,4 +1,4 @@
-CFLAGS ?= -std=c99 -Wall -Wextra -Werror -Wpedantic
+CFLAGS ?= -std=c99 -Wall -Wextra -Werror -pedantic
 
 all: test example_nc
 
