@@ -21,6 +21,40 @@ any other embedded platform such as AVR or MSP430.
 
 ## Example
 
+```c
+typedef pt_queue(struct packet, 32) packet_queue_t;
+void producer(struct pt *pt, packet_queue_t *q) {
+	pt_begin(pt);
+	for (;;) {
+		pt_wait(pt, !pt_queue_full(q) && packet_available());
+		pt_queue_push(q, packet_read());
+	}
+	pt_end(pt);
+}
+
+void consumer(struct pt *pt, packet_queue_t *q) {
+	pt_begin(pt);
+	for (;;) {
+		/* For for some data in the queue */
+		pt_wait(pt, !pt_queue_empty(q));
+		struct packet p = pt_queue_pop(q);
+		/* process packet here */
+	}
+	pt_end(pt);
+}
+
+...
+
+struct pt pt_producer = pt_init();
+struct pt pt_consumer = pt_init();
+packet_queue_t queue = pt_queue_init();
+
+for (;;) {
+	producer(&pt_producer, &queue);
+	consumer(&pt_consumer, &queue);
+}
+```
+
 ## API
 
 Protothread API:
@@ -81,6 +115,6 @@ Pt is well covered with tests.
 Code is distributed under MIT license, feel free to use it in your proprietary
 projects as well.
 
-1: dunkels.com/adam/pt/
-2: https://en.wikipedia.org/wiki/Coroutine
-3: https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
+[1]: dunkels.com/adam/pt/
+[2]: https://en.wikipedia.org/wiki/Coroutine
+[3]: https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
