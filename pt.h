@@ -1,6 +1,7 @@
 #ifndef PT_H
 #define PT_H
 
+/* Protothread status values */
 #define PT_STATUS_BLOCKED 0
 #define PT_STATUS_FINISHED -1
 #define PT_STATUS_YIELDED -2
@@ -39,13 +40,13 @@ struct pt {
   } while (0)
 #define pt_end(pt) pt_label(pt, PT_STATUS_FINISHED)
 #elif PT_USE_GOTO
-#include <unistd.h>
 /*
  * Local continuation based on goto label references.
  *
  * Pros: works with all control sturctures.
  * Cons: requires GCC or Clang, doesn't preserve local variables.
  */
+#include <unistd.h>
 struct pt {
   void *label;
   int status;
