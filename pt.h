@@ -127,7 +127,7 @@ struct pt {
   for (int _intr = 0; _intr == 0;)                                             \
     if (1) {                                                                   \
       pt_label(pt, PT_STATUS_BLOCKED);                                         \
-      if (!cond) {                                                             \
+      if (!(cond)) {                                                           \
         break;                                                                 \
       }                                                                        \
       goto _pt_line(body);                                                     \
