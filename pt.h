@@ -162,7 +162,8 @@ struct pt {
 
 #define pt_queue_push(q, el)                                                   \
   (!pt_queue_full(q) && ((q)->buf[(q)->w++ % pt_queue_len(q)] = (el), 1))
-#define pt_queue_peek(q) (pt_queue_empty(q) ? NULL : &(q)->buf[(q)->r])
+#define pt_queue_peek(q)                                                       \
+  (pt_queue_empty(q) ? NULL : &(q)->buf[(q)->r % pt_queue_len(q)])
 #define pt_queue_pop(q)                                                        \
   (pt_queue_empty(q) ? NULL : &(q)->buf[(q)->r++ % pt_queue_len(q)])
 
